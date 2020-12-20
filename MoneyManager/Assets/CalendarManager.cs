@@ -18,6 +18,8 @@ public class CalendarManager : MonoBehaviour
     int _curDisplayMonth;
     int _curDisplayYear;
 
+    DateTime _dtStartDay;
+
     public int CurDisplayMonth
     { 
         get { return _curDisplayMonth; }
@@ -29,6 +31,10 @@ public class CalendarManager : MonoBehaviour
         set { _curDisplayYear = value; }
     }
 
+    public DateTime StartDay
+    {
+        set { _dtStartDay = value; }
+    }
 
     public void Init()
     {
@@ -65,22 +71,33 @@ public class CalendarManager : MonoBehaviour
 
         for (int i = 0; i < _days.Count; i++)
         {
-            _days[i].Init();
+            _days[i].Init(); // DayObject 초기화
 
-            if (isStart || (int)firstDayOfWeek == i)
+            if (isStart || (int)firstDayOfWeek == i) // 매월 1일에 해당하는 요일부터 시작
             {
-                if (day <= lastDayofMonth)
+                if (day <= lastDayofMonth) // 마지막 날까지
                 {
                     isStart = true;
 
                     _days[i].Days = day;
                     _days[i].IsDay = true;
 
+
+                    // 시작일과 오늘 사이 체크
+                    DateTime dtDay = new DateTime(_curDisplayYear, _curDisplayMonth, day);
+
+                    if (_dtStartDay.DayOfYear <= dtDay.DayOfYear &&
+                        dtDay.DayOfYear <= DateTime.Today.DayOfYear)
+                    {
+                        _days[i].IsInclude = true;
+                    }// 시작일과 오늘 사이 체크
+
+
                     day++;
                 }
             }
 
-            _days[i].dayUpdate();
+            _days[i].dayUpdate(); // DayObject 데이터 갱신
         }
     }
 

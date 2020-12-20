@@ -160,6 +160,24 @@ public class OneScript : MonoBehaviour
         _calendarManager.MakeCalendar(year, month);
     }
 
+    public void ChangeStartDay(int day)
+    {
+        int year = _calendarManager.CurDisplayYear;
+        int month = _calendarManager.CurDisplayMonth;
+
+        DateTime dateTime = new DateTime(year, month, day);
+
+        _dtFirstDate = dateTime;
+
+        _calendarManager.StartDay = _dtFirstDate;
+
+        TimeSpan timeSpan = DateTime.Now - _dtFirstDate;
+
+        _day = timeSpan.Days + 1;
+
+        OutPutUpdate();
+    }
+
     public void IFSetTheNumberWithComma(Text targetText)
     {
         if (int.TryParse(targetText.text, out int num))
@@ -182,6 +200,7 @@ public class OneScript : MonoBehaviour
     {
         string forText = "";
         int num = 0;
+
         if (_totalMoney > (_limitMoney * _day)) // 만원 초과
         {
             forText = string.Format("초과\n");
@@ -202,7 +221,7 @@ public class OneScript : MonoBehaviour
         _dayText.text = _day + " 일";
 
         _startDay.text = "시작일 " + _dtFirstDate.ToString("yyyy.MM.dd");
-        _startDayInSetting.text = _startDay.text;
+        _startDayInSetting.text = _dtFirstDate.ToString("yyyy.MM.dd");
 
         _todayText.text = DateTime.Now.ToString("yyyy.MM.dd");
 
@@ -227,7 +246,6 @@ public class OneScript : MonoBehaviour
         PlayerPrefs.SetInt("LimitMoney", _limitMoney);
         PlayerPrefs.SetInt("TotalMoney", _totalMoney);
         PlayerPrefs.SetString("StartDay", _dtFirstDate.ToString());
-
 
         PlayerPrefs.Save();
     }
@@ -269,8 +287,10 @@ public class OneScript : MonoBehaviour
         else
         {
 
-            _dtFirstDate = DateTime.Now;
+            _dtFirstDate = DateTime.Now.Date;
             _day = 1;
         }
+
+        _calendarManager.StartDay = _dtFirstDate;
     }
 }

@@ -8,7 +8,6 @@ using UnityEngine.UIElements;
 [SerializeField]
 public class OneScript : MonoBehaviour
 {
-    public GameObject _settingPanel;
     public InputField _addMoneyInput;
     public InputField _limitMoneySettingInput;
     public Text _outputText;
@@ -20,6 +19,7 @@ public class OneScript : MonoBehaviour
     public Text _startDayInSetting;
 
     public CalendarManager _calendarManager;
+    public UsageHistoryManager _usageHistoryManager;
 
     DateTime _dtFirstDate;
     [SerializeField]int _day;
@@ -33,10 +33,10 @@ public class OneScript : MonoBehaviour
     {
         InitData(); // 데이터 갱신
 
-        if (_settingPanel == null)
-        {
-            Debug.Log("settingPanel is null");
-        }
+        //if (_settingPanel == null)
+        //{
+        //    Debug.Log("settingPanel is null");
+        //}
 
         if (_addMoneyInput == null)
         {
@@ -71,6 +71,11 @@ public class OneScript : MonoBehaviour
             if (plusMoney > 0)
             {
                 _totalMoney += plusMoney;
+
+                string today = DateTime.Now.ToString("yyyy.MM.dd HH:mm");
+
+                _usageHistoryManager.AddContent(string.Format("{0}\n: {1}", today, plusMoney));
+                _usageHistoryManager.GetComponent<ScrollRect>().verticalScrollbar.value = 0;
             }
             else
             {
@@ -88,19 +93,29 @@ public class OneScript : MonoBehaviour
     public void ClickReset()
     {
         PlayerPrefs.DeleteAll();
+        _usageHistoryManager.ResetUHManager();
         
         LoadDate();
         OutPutUpdate();
     }
 
-    public void ClickOpenSettingPanel()
+    //public void ClickOpenSettingPanel()
+    //{
+    //    _settingPanel.SetActive(true);
+    //}
+
+    //public void ClickCloseSettingPanel()
+    //{
+    //    _settingPanel.SetActive(false);
+    //}
+    public void ClickClosePanel(GameObject go)
     {
-        _settingPanel.SetActive(true);
+        go.SetActive(false);
     }
 
-    public void ClickCloseSettingPanel()
+    public void ClickOpenPanel(GameObject go)
     {
-        _settingPanel.SetActive(false);
+        go.SetActive(true);
     }
 
     public void ClickExit()
@@ -193,6 +208,7 @@ public class OneScript : MonoBehaviour
         _safeColor = new Color(93 / 255f, 214 / 255f, 92 / 255f);
         _overColor = Color.red;
         _calendarManager.Init();
+        _usageHistoryManager.Init();
 
         LoadDate();
     }
@@ -246,12 +262,15 @@ public class OneScript : MonoBehaviour
         PlayerPrefs.SetInt("LimitMoney", _limitMoney);
         PlayerPrefs.SetInt("TotalMoney", _totalMoney);
         PlayerPrefs.SetString("StartDay", _dtFirstDate.ToString());
+        _usageHistoryManager.SaveData();
 
         PlayerPrefs.Save();
     }
 
     private void LoadDate()
     {
+        _usageHistoryManager.LoadData();
+
         if (PlayerPrefs.HasKey("TotalMoney"))
         {
             _totalMoney = PlayerPrefs.GetInt("TotalMoney");
